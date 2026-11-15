@@ -1,0 +1,17 @@
+# 생성물 (스크립트로 다시 만든다)
+build/
+slprj/
+*.mat
+*.slxc
+*.asv
+__pycache__/
+deploy/rpi/des_main
+deploy/demo_log/
+
+# 실촬영 DMS 결과 그림, 중간발표 그림
+figures/dms/
+figures/midterm_1013/
+
+# 지금은 쓰지 않는 이전 MATLAB Coder 경로
+src/des_entry*.m
+build_codegen.m
