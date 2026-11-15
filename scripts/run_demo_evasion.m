@@ -1,6 +1,6 @@
-%RUN_DEMO_EVASION  "4.8 s 딴짓 -> 0.3 s 전방" 반복을 M0~M3에 넣어 비교
+﻿%RUN_DEMO_EVASION  "4.8 s 딴짓 -> 0.3 s 전방" 반복을 M0~M3에 넣어 비교
 
-here = fileparts(mfilename('fullpath'));
+here = fileparts(fileparts(mfilename('fullpath')));   % supervisor/ (scripts/의 한 단계 위)
 addpath(fullfile(here, 'src'));
 
 dt = 0.01; T = 60;

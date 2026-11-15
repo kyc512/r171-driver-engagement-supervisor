@@ -1,9 +1,9 @@
-%MAKE_FIGURES  발표용 그림 생성 -> figures/*.png
+﻿%MAKE_FIGURES  발표용 그림 생성 -> figures/*.png
 %   fig1_timeline.png   : 4.8/0.3 회피 패턴에서 모델별 경고 단계
 %   fig2_mechanism.png  : 모델별 내부량 (왜 M0만 못 잡는가)
 %   fig3_detection_map.png : 이탈x복귀 격자 탐지 지도
 
-here = fileparts(mfilename('fullpath'));
+here = fileparts(fileparts(mfilename('fullpath')));   % supervisor/ (scripts/의 한 단계 위)
 addpath(fullfile(here, 'src'));
 outdir = fullfile(here, 'figures');
 if ~exist(outdir, 'dir'), mkdir(outdir); end

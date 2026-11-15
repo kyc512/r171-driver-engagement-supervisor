@@ -1,8 +1,8 @@
-%RUN_EVASION_GRID  이탈/복귀 시간 격자에서 모델별 탐지 여부 (탐지 영역 지도 초안)
+﻿%RUN_EVASION_GRID  이탈/복귀 시간 격자에서 모델별 탐지 여부 (탐지 영역 지도 초안)
 %   셀 값 = 첫 EOR까지 시간 [s]. 빈칸(NaN) = T 동안 경고 없음(회피 성공)
 %   격자가 크면 느림 -> build_codegen.m 의 MEX 옵션 참고
 
-here = fileparts(mfilename('fullpath'));
+here = fileparts(fileparts(mfilename('fullpath')));   % supervisor/ (scripts/의 한 단계 위)
 addpath(fullfile(here, 'src'));
 
 dt = 0.01; T = 90;

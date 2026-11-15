@@ -12,13 +12,14 @@ UN R171(DCAS)의 운전자 주시 감시를 조문 그대로 구현하면, **4.8
 
 | 구분 | 위치 | 필요한 것 | 내용 |
 |---|---|---|---|
-| **PC에서 돌리는 코드** | `src/`, `model/`, `tests/`, 루트의 `*.m` | MATLAB R2026b | 기준 구현, Simulink/Stateflow 모델 생성, C 코드 생성, 검증, 평가, 그림 |
+| **PC에서 돌리는 코드** | `src/`, `model/`, `scripts/`, `tests/` | MATLAB R2026b | 기준 구현, Simulink/Stateflow 모델 생성, C 코드 생성, 검증, 평가, 그림 |
 | **Pi에 올리는 코드** | [`deploy/`](deploy/) | gcc, make | 생성된 C 코드, 실행 프로그램 `des_main`, 데모 CSV. MATLAB 불필요 |
 
 `deploy/` 폴더만 Pi로 복사하면 됩니다. 방법은 [deploy/README.md](deploy/README.md)에 있습니다.
 
 **PC (MATLAB)**
 ```matlab
+addpath('scripts')       % 최초 1회
 runtests('tests')        % 단위 테스트
 run_r171_boundary        % R171 경계값 12케이스
 make_figures             % 발표 그림 -> figures/
@@ -32,7 +33,7 @@ make
 ./des_main --csv ../demo/3_evasion.csv --calib 5    # M0는 조용하고 M3는 10.51초에 EOR
 ```
 
-이 저장소에는 Supervisor만 있습니다. DMS 모듈, 실촬영 DMS 결과(`../dms_results`), 정상 운전 시선 생성기(`../supervisor_b`)는 들어 있지 않으므로, 이를 읽는 `run_dms_results`(기본 경로), `make_dms_figures`, `run_real_vs_synth`, `run_operating_point`는 해당 자료가 있어야 실행됩니다. `run_dms_results('deploy/demo')`는 저장소만으로 실행됩니다.
+이 저장소에는 Supervisor만 있습니다. DMS 모듈, 실촬영 DMS 결과(`../dms_results`), 정상 운전 시선 생성기(`../supervisor_b`)는 들어 있지 않으므로, 이를 읽는 `scripts/`의 `run_dms_results`(기본 경로), `make_dms_figures`, `run_real_vs_synth`, `run_operating_point`는 해당 자료가 있어야 실행됩니다. `run_dms_results('deploy/demo')`는 저장소만으로 실행됩니다.
 
 Stateflow 설계는 [docs/stateflow_design.md](docs/stateflow_design.md).
 
@@ -66,23 +67,23 @@ DMS (노트북) ── CSV: timestamp, face_detected, yaw, pitch ──► RPi5 
 | `src/b2b_scenarios.m`, `src/b2b_compare.m` | back-to-back 시나리오 / 매 스텝 비교 |
 | `model/build_model.m` | Simulink/Stateflow 모델 자동 생성 → `model/des_supervisor.slx` |
 | `model/sim_model.m` | Simulink 모델 시뮬레이션 (sim_system과 같은 형식) |
-| `build_system.m` | 모델 생성 + C 코드 생성 → `deploy/codegen/` |
-| `run_b2b.m` | back-to-back: 기준 코드 vs Simulink |
-| `run_b2b_c.m` | back-to-back: 기준 코드 vs C 실행 프로그램 (노트북 빌드 또는 Pi 로그) |
+| `scripts/build_system.m` | 모델 생성 + C 코드 생성 → `deploy/codegen/` |
+| `scripts/run_b2b.m` | back-to-back: 기준 코드 vs Simulink |
+| `scripts/run_b2b_c.m` | back-to-back: 기준 코드 vs C 실행 프로그램 (노트북 빌드 또는 Pi 로그) |
 | `deploy/` | Pi 배포 묶음 (생성 코드, `des_main.c`, Makefile, UDP 테스트 송신기) |
 | `src/dms_load_csv.m` | DMS CSV 읽기 (`valid` 또는 `face_detected` 형식) + 처음 N초 0점 보정 |
-| `run_dms_results.m` | DMS 팀 실촬영 CSV(`../dms_results`)를 시스템 전체에 넣어 M0~M3 결과 표. C 로그와 매 스텝 비교도 가능 |
-| `run_demo_evasion.m` | 4.8/0.3 회피 패턴 M0~M3 비교 그림 |
-| `run_evasion_grid.m` | 이탈×복귀 격자 탐지 지도 |
-| `run_r171_boundary.m` | R171 경계값 12케이스 표 → `docs/r171_boundary.md` |
-| `run_random_check.m` | 무작위 시퀀스에서 M1~M3가 M0보다 늦게 경고하지 않는지 매 스텝 확인 |
-| `run_operating_point.m` | 파라미터별 탐지율-오경보 (supervisor_b 정상 운전 생성기 사용) |
-| `run_adaptive_limit.m` | 적응형 회피 한계: 경고 없이 가능한 최대 이탈 비율 → `figures/fig4_adaptive_limit.png` |
-| `run_real_vs_synth.m` | 실촬영 정상 주행과 합성 정상 운전의 시선 통계 비교 → `docs/real_vs_synth.md` |
-| `make_dms_figures.m` | DMS 실촬영 CSV별 타임라인 그림(각도, 주시 판정, M0~M3 단계) → `figures/dms/` |
-| `docs/model_selection.md` | 최종 모델 선택 근거 (권고안 M3) |
-| `make_figures.m` | 발표 그림 → `figures/` (중간발표 버전은 `figures/midterm_1013/`) |
+| `scripts/run_dms_results.m` | DMS 팀 실촬영 CSV(`../dms_results`)를 시스템 전체에 넣어 M0~M3 결과 표. C 로그와 매 스텝 비교도 가능 |
+| `scripts/run_demo_evasion.m` | 4.8/0.3 회피 패턴 M0~M3 비교 그림 |
+| `scripts/run_evasion_grid.m` | 이탈×복귀 격자 탐지 지도 |
+| `scripts/run_r171_boundary.m` | R171 경계값 12케이스 표 → `docs/r171_boundary.md` |
+| `scripts/run_random_check.m` | 무작위 시퀀스에서 M1~M3가 M0보다 늦게 경고하지 않는지 매 스텝 확인 |
+| `scripts/run_operating_point.m` | 파라미터별 탐지율-오경보 (supervisor_b 정상 운전 생성기 사용) |
+| `scripts/run_adaptive_limit.m` | 적응형 회피 한계: 경고 없이 가능한 최대 이탈 비율 → `figures/fig4_adaptive_limit.png` |
+| `scripts/run_real_vs_synth.m` | 실촬영 정상 주행과 합성 정상 운전의 시선 통계 비교 → `docs/real_vs_synth.md` |
+| `scripts/make_dms_figures.m` | DMS 실촬영 CSV별 타임라인 그림(각도, 주시 판정, M0~M3 단계) → `figures/dms/` |
+| `scripts/make_figures.m` | 발표 그림 → `figures/` (중간발표 버전은 `figures/midterm_1013/`) |
 | `tests/` | 단위 테스트 (`runtests('tests')`) |
+| `docs/` | 최종 모델 선택 근거(`model_selection.md`), R171 경계값 표, Stateflow 설계 |
 
 ## 모델
 

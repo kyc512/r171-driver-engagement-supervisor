@@ -1,4 +1,4 @@
-function T = run_r171_boundary(out_md)
+﻿function T = run_r171_boundary(out_md)
 %RUN_R171_BOUNDARY  R171 01 series 경계값 12케이스: M0가 규정대로 동작하는지 + M1~M3가 M0보다 늦지 않은지
 %   T = run_r171_boundary                       % 표 출력 + docs/r171_boundary.md 생성
 %   T = run_r171_boundary('')                   % 파일 생성 안 함
@@ -9,7 +9,7 @@ function T = run_r171_boundary(out_md)
 %     'reeor' : 두 번째 이탈 뒤 처음 경고가 켜져 있는 시각. M0 = 기대값, M1~M3 <= M0
 %   시각은 스텝 종료 시각 L.t (dt = 0.01 s). 시나리오는 모두 "주시로 시작"하지 않으면 t = 0부터 이탈.
 
-here = fileparts(mfilename('fullpath'));
+here = fileparts(fileparts(mfilename('fullpath')));   % supervisor/ (scripts/의 한 단계 위)
 addpath(fullfile(here, 'src'));
 if nargin < 1, out_md = fullfile(here, 'docs', 'r171_boundary.md'); end
 dt = 0.01; K = @(s) round(s / dt);

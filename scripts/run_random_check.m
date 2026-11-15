@@ -1,4 +1,4 @@
-function R = run_random_check(N, T, seed)
+﻿function R = run_random_check(N, T, seed)
 %RUN_RANDOM_CHECK  무작위 시퀀스 검증 (중간발표 피드백 ②): 어떤 입력에서도 M1~M3가 M0(R171)보다 늦게 경고하지 않는가
 %   R = run_random_check            % 2000개 x 60 s
 %   R = run_random_check(N, T, seed)
@@ -14,7 +14,7 @@ function R = run_random_check(N, T, seed)
 if nargin < 1, N = 2000; end
 if nargin < 2, T = 60; end
 if nargin < 3, seed = 1; end
-here = fileparts(mfilename('fullpath'));
+here = fileparts(fileparts(mfilename('fullpath')));   % supervisor/ (scripts/의 한 단계 위)
 addpath(fullfile(here, 'src'));
 
 rng(seed);

@@ -1,4 +1,4 @@
-function R = run_operating_point(m, vals, seeds)
+﻿function R = run_operating_point(m, vals, seeds)
 %RUN_OPERATING_POINT  탐지율-오경보 트레이드오프: 모델별 핵심 파라미터를 훑어 동작점 후보를 만든다
 %   R = run_operating_point(m)              % m = 0~3, 기본 파라미터 범위, seed 1~10
 %   R = run_operating_point(m, vals, seeds)
@@ -13,7 +13,7 @@ function R = run_operating_point(m, vals, seeds)
 %   오경보: supervisor_b 정상 운전 생성기 (highway / urban / infotainment) 1시간 x seed, 시간당 EOR 진입 횟수
 %           운전자는 DCA에 응답(driver_action = 1)한다고 둔다. 응답이 없으면 운전불가에서 멈춰 EOR이 덜 세어진다.
 
-here = fileparts(mfilename('fullpath'));
+here = fileparts(fileparts(mfilename('fullpath')));   % supervisor/ (scripts/의 한 단계 위)
 addpath(fullfile(here, 'src'), fullfile(fileparts(here), 'supervisor_b'));
 if ischar(m) && strcmp(m, 'plot'), R = plot_all(here); return, end
 if nargin < 2 || isempty(vals)

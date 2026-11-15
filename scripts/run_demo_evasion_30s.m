@@ -1,7 +1,7 @@
-%RUN_DEMO_EVASION_30S  run_demo_evasion.m 발표용 변형: 30 s, 그래프는 강화 EOR 단계까지만 표시
+﻿%RUN_DEMO_EVASION_30S  run_demo_evasion.m 발표용 변형: 30 s, 그래프는 강화 EOR 단계까지만 표시
 %   시뮬레이션은 동일 (DCA/UNAVAIL 도 내부적으로는 진행됨). 그래프에서만 2(강화 EOR) 이상을 2로 표시
 
-here = fileparts(mfilename('fullpath'));
+here = fileparts(fileparts(mfilename('fullpath')));   % supervisor/ (scripts/의 한 단계 위)
 addpath(fullfile(here, 'src'));
 
 dt = 0.01; T = 30;

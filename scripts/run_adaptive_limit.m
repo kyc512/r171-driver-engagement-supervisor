@@ -1,4 +1,4 @@
-function A = run_adaptive_limit(T)
+﻿function A = run_adaptive_limit(T)
 %RUN_ADAPTIVE_LIMIT  적응형 회피 한계: 모델을 아는 운전자가 경고 없이 얼마나 안 볼 수 있는가
 %   A = run_adaptive_limit          % 120 s
 %   A = run_adaptive_limit(T)
@@ -9,7 +9,7 @@ function A = run_adaptive_limit(T)
 %   이 값이 낮을수록, 모델의 기준을 정확히 알고 맞춰 움직이는 운전자도 오래 안 볼 수 없다.
 %   결과: build/adaptive_limit.mat, figures/fig4_adaptive_limit.png, 표 출력
 
-here = fileparts(mfilename('fullpath'));
+here = fileparts(fileparts(mfilename('fullpath')));   % supervisor/ (scripts/의 한 단계 위)
 addpath(fullfile(here, 'src'));
 if nargin < 1, T = 120; end
 if ischar(T)                                   % run_adaptive_limit('plot'): 저장된 결과로 그림만 다시

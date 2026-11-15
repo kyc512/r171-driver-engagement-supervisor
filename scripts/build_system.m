@@ -1,4 +1,4 @@
-function build_system(sel_model)
+﻿function build_system(sel_model)
 %BUILD_SYSTEM  모델 생성 -> Simulink Coder(grt)로 C 생성 -> deploy/codegen/ 에 모음
 %   build_system        % 선택 모델 M3
 %   build_system(2)
@@ -8,7 +8,7 @@ function build_system(sel_model)
 %     des_config.h : 선택 모델 번호와 주요 파라미터 (실행 프로그램 화면 표시용)
 
 if nargin < 1, sel_model = 3; end
-here = fileparts(mfilename('fullpath'));
+here = fileparts(fileparts(mfilename('fullpath')));   % supervisor/ (scripts/의 한 단계 위)
 addpath(fullfile(here, 'src'), fullfile(here, 'model'));
 
 mdl = build_model(sel_model);

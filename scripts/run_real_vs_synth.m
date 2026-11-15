@@ -1,4 +1,4 @@
-function R = run_real_vs_synth(seeds)
+﻿function R = run_real_vs_synth(seeds)
 %RUN_REAL_VS_SYNTH  실촬영 정상 주행과 합성 정상 운전 패턴의 시선 통계 비교 (중간발표 피드백 ①)
 %   R = run_real_vs_synth           % 생성기 seed 1~10 x 1시간
 %   결과: 표 출력 + docs/real_vs_synth.md
@@ -8,7 +8,7 @@ function R = run_real_vs_synth(seeds)
 %   합성:   supervisor_b/normal_pattern (highway / urban / infotainment).
 %   두 쪽 모두 같은 함수로 주시 판정 시퀀스(100 Hz)에서 통계를 낸다.
 
-here = fileparts(mfilename('fullpath'));
+here = fileparts(fileparts(mfilename('fullpath')));   % supervisor/ (scripts/의 한 단계 위)
 addpath(fullfile(here, 'src'), fullfile(fileparts(here), 'supervisor_b'));
 if nargin < 1, seeds = 1:10; end
 dt = 0.01; calib_s = 5;

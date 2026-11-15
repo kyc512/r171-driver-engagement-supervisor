@@ -1,9 +1,9 @@
-%RUN_B2B  back-to-back 검증: MATLAB 기준(sim_system) vs Simulink/Stateflow 모델, 매 스텝 비교
+﻿%RUN_B2B  back-to-back 검증: MATLAB 기준(sim_system) vs Simulink/Stateflow 모델, 매 스텝 비교
 %   비교 대상: 두 채널(M0, 선택 모델)의 esc, disengaged, metric + 입력 단계의 gaze_on, frozen
 %   esc/disengaged/gaze_on/frozen은 완전 일치, metric(M3 버퍼, double)은 1e-12 이내.
 %   C 코드(RPi5 실행 프로그램)와의 대조는 run_b2b_c.m.
 
-here = fileparts(mfilename('fullpath'));
+here = fileparts(fileparts(mfilename('fullpath')));   % supervisor/ (scripts/의 한 단계 위)
 addpath(fullfile(here, 'src'), fullfile(here, 'model'));
 sel = 3;
 

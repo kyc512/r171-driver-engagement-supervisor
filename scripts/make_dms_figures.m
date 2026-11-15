@@ -1,4 +1,4 @@
-function make_dms_figures(folder, calib_s, outdir)
+﻿function make_dms_figures(folder, calib_s, outdir)
 %MAKE_DMS_FIGURES  DMS 실촬영 CSV별 타임라인 그림 -> figures/dms/<파일명>.png
 %   make_dms_figures                       % ../dms_results/*.csv, 처음 5초 0점 보정
 %   make_dms_figures(folder, calib_s, outdir)
@@ -6,7 +6,7 @@ function make_dms_figures(folder, calib_s, outdir)
 %   위에서부터: yaw, pitch (보정 후, 회색 띠 = 정면 범위), 입력 단계의 주시 판정,
 %   M0~M3 경고 단계. 시스템 전체 기준 동작(sim_system)을 그대로 쓴다.
 
-here = fileparts(mfilename('fullpath'));
+here = fileparts(fileparts(mfilename('fullpath')));   % supervisor/ (scripts/의 한 단계 위)
 addpath(fullfile(here, 'src'));
 if nargin < 1 || isempty(folder), folder = fullfile(fileparts(here), 'dms_results'); end
 if nargin < 2 || isempty(calib_s), calib_s = 5; end

@@ -1,4 +1,4 @@
-function R = run_dms_results(folder, calib_s, c_log_dir)
+﻿function R = run_dms_results(folder, calib_s, c_log_dir)
 %RUN_DMS_RESULTS  DMS 팀 실촬영 CSV를 Supervisor 전체(입력 단계 + M0~M3)에 넣어 결과 표 출력
 %   R = run_dms_results                    ../dms_results/*.csv, 처음 5초로 0점 보정
 %   R = run_dms_results(folder, calib_s)
@@ -8,7 +8,7 @@ function R = run_dms_results(folder, calib_s, c_log_dir)
 %   촬영 프로토콜의 "세션 시작 5초 정면 주시" 규칙을 0점 보정에 쓴다.
 %   열: 길이, valid 비율, 보정값, 가장 긴 비주시 구간, 고정 판정 시간, 모델별 첫 EOR / 최고 단계
 
-here = fileparts(mfilename('fullpath'));
+here = fileparts(fileparts(mfilename('fullpath')));   % supervisor/ (scripts/의 한 단계 위)
 addpath(fullfile(here, 'src'));
 if nargin < 1 || isempty(folder), folder = fullfile(fileparts(here), 'dms_results'); end
 if nargin < 2, calib_s = 5; end

@@ -1,4 +1,4 @@
-function run_b2b_c(mode)
+﻿function run_b2b_c(mode)
 %RUN_B2B_C  back-to-back 검증: MATLAB 기준(sim_system) vs 생성 C 코드 실행 프로그램(des_main)
 %   run_b2b_c          % 입력 CSV 생성 -> 노트북(MSVC)에서 des_main 빌드·실행 -> 비교
 %   run_b2b_c('pi')    % build/b2b/pi/out_*.csv (RPi5에서 돌린 로그)를 비교
@@ -11,7 +11,7 @@ function run_b2b_c(mode)
 %   C 프로그램은 CSV를 직접 읽어 100 Hz로 리샘플(ZOH)하므로, 리샘플 규칙(des_resample.m)까지 대조된다.
 
 if nargin < 1, mode = 'host'; end
-here = fileparts(mfilename('fullpath'));
+here = fileparts(fileparts(mfilename('fullpath')));   % supervisor/ (scripts/의 한 단계 위)
 addpath(fullfile(here, 'src'));
 sel = 3;
 dir_b2b = fullfile(here, 'build', 'b2b');
