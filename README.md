@@ -119,7 +119,7 @@ DMS (노트북) ── CSV: timestamp, face_detected, yaw, pitch ──► RPi5 
 | `aoi_yaw`, `aoi_pitch` | 11°, 13° | 처음 5초 0점 보정 후 \|yaw\|, \|pitch\|가 이 범위 안이면 주시 (11/12 확정) |
 | `in_stale` | 0.2 s | 이보다 오래된 프레임은 미검출 처리 |
 | `fz_W`, `fz_range` | 10 s, 1.0° | 10초 동안 yaw와 pitch 변화폭이 모두 1° 미만이면 고정(사진 의심) → 미검출 처리 |
-| `fz_enable` | M0만 false | M0는 R171 그대로 두고 비교 기준선으로 씀 |
+| `fz_enable` | M0만 false | M0는 R171 타이머 기준선으로 남겨 비교에 씀 |
 
 ## 검증 결과 (2026-11-12, R171 01 series 반영 후)
 

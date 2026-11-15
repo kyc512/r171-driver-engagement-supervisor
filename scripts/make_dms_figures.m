@@ -14,7 +14,7 @@ if nargin < 3 || isempty(outdir), outdir = fullfile(here, 'figures', 'dms'); end
 if ~exist(outdir, 'dir'), mkdir(outdir); end
 
 fn = 'Malgun Gothic';
-names  = {'M0  R171 최소 구현', 'M1  재관여 강화', 'M2  30 s 누적 이탈', 'M3  주의 버퍼'};
+names  = {'M0  R171 타이머 기준선', 'M1  재관여 강화', 'M2  30 s 누적 이탈', 'M3  주의 버퍼'};
 colors = [0.165 0.471 0.839; 0.922 0.408 0.204; 0.106 0.686 0.478; 0.929 0.631 0];
 stages = {'정상', 'EOR', '강화 EOR', 'DCA', '운전불가'};
 band   = [0.88 0.88 0.86];

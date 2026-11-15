@@ -52,7 +52,7 @@ P.m3_B_clear   = 1.0;      % 경고 해제: 버퍼가 이 값 이상 회복
 P.aoi_yaw   = 11.0;        % 주시 영역 |yaw| <= 이 값 [deg] (보정 후 각도 기준)
 P.aoi_pitch = 13.0;        % 주시 영역 |pitch| <= 이 값 [deg]
 P.in_stale  = 0.2;         % DMS 프레임이 이보다 오래되면 valid = 0 [s] (통신 끊김 = 이탈)
-P.fz_enable = model ~= 0;  % M0(R171 그대로)는 고정 탐지 없음
+P.fz_enable = model ~= 0;  % M0(R171 타이머 기준선)는 고정 탐지 없음
 P.fz_W      = 10.0;        % 고정 판정 창 [s]: 이 시간 연속 valid 동안
 P.fz_range  = 1.0;         %   yaw, pitch 모두 (최대-최소) < 이 값 [deg] 이면 고정 -> valid = 0
 

@@ -249,7 +249,7 @@ static void summary_update(long k, const des_output_t *o)
 static const char *ch_label(int c)
 {
     static char buf[32];
-    if (c == 0) return "M0 (R171 기준)";
+    if (c == 0) return "M0 (R171 타이머)";
     snprintf(buf, sizeof buf, "M%d (선택 모델)", DES_SEL_MODEL);
     return buf;
 }

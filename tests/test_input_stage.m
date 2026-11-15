@@ -63,7 +63,7 @@ tc.verifyTrue(U.valid(51));
 end
 
 function test_photo_m0_silent_selected_alarms(tc)
-% 사진(고정): M0는 R171 그대로라 속고, 선택 모델은 고정 탐지로 경고
+% 사진(고정): M0는 타이머 기준선이라 속고, 선택 모델은 고정 탐지로 경고
 n = 4000;
 U.valid = true(n, 1); U.yaw = 0.1 * sin((1:n)' * 0.05); U.pitch = zeros(n, 1);
 U.action = false(n, 1); U.reset = false(n, 1);

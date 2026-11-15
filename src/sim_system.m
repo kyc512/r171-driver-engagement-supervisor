@@ -4,7 +4,7 @@ function L = sim_system(U, sel_model)
 %   U: 100 Hz 스텝 입력 (des_resample 출력 형식: valid, yaw, pitch, action, reset)
 %
 %   Simulink 모델(model/des_supervisor.slx)과 RPi5 실행 프로그램이 매 스텝 이 결과와 같아야 한다.
-%   채널마다 P.fz_enable이면 고정 탐지 결과를 valid에 반영 (M0는 R171 그대로라 미적용).
+%   채널마다 P.fz_enable이면 고정 탐지 결과를 valid에 반영 (M0는 R171 타이머 기준선이라 미적용).
 
 if nargin < 2, sel_model = 3; end
 n  = numel(U.valid);

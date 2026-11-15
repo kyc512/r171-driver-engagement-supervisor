@@ -51,7 +51,7 @@ end
 function plot_limit(A, here)
 T = A.T; off_list = A.off_list; on_list = A.on_list; quiet = A.quiet; ratio = A.ratio;
 fn = 'Malgun Gothic';
-names  = {'M0  R171 최소 구현', 'M1  재관여 강화 (1.0 s)', 'M2  최근 30 s 누적 이탈', 'M3  주의 버퍼'};
+names  = {'M0  R171 타이머 기준선', 'M1  재관여 강화 (1.0 s)', 'M2  최근 30 s 누적 이탈', 'M3  주의 버퍼'};
 colors = [0.165 0.471 0.839; 0.922 0.408 0.204; 0.106 0.686 0.478; 0.929 0.631 0];
 cmap = [linspace(0.99, 0.80, 64)' linspace(0.93, 0.20, 64)' linspace(0.85, 0.15, 64)'];
 f = figure('Color', 'w', 'Position', [100 100 1500 760], 'Visible', 'off');

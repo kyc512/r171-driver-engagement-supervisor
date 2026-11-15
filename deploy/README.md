@@ -45,7 +45,7 @@ sudo apt install -y libgpiod-dev && make clean && make GPIO=1
 
 실촬영 DMS CSV 3개와 DMS 팀이 만든 4.8/0.3 합성 CSV 1개다. 모두 `--calib 5`로 실행한다.
 
-| 파일 | 원본 | 내용 | M0 (R171 기준) | M3 (선택 모델) |
+| 파일 | 원본 | 내용 | M0 (R171 타이머) | M3 (선택 모델) |
 |---|---|---|---|---|
 | `1_normal.csv` | s1_2_1 | 정상 주행 중 내비 확인 | 경고 없음 | 경고 없음 |
 | `2_continuous.csv` | s2_1 | 스마트폰 연속 이탈 | 11.11초 EOR | 11.11초 EOR (같은 시각) |
@@ -87,7 +87,7 @@ sock.sendto(f"{t:.3f},{int(valid)},{yaw:.2f},{pitch:.2f}\n".encode(), (PI_IP, 50
 
 ## 4. GPIO 배선 (`--gpio`, BCM 번호)
 
-| 핀 | M0 (R171 기준) | 핀 | 선택 모델 |
+| 핀 | M0 (R171 타이머) | 핀 | 선택 모델 |
 |---|---|---|---|
 | 5 | EOR 이상 | 12 | EOR 이상 |
 | 6 | 강화 EOR 이상 | 16 | 강화 EOR 이상 |

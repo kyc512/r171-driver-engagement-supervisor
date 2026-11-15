@@ -11,7 +11,7 @@ set(groot, 'defaultAxesFontName', 'Malgun Gothic', 'defaultTextFontName', 'Malgu
            'defaultAxesFontSize', 11);
 
 dt = 0.01;
-names  = {'M0  R171 최소 구현', 'M1  재관여 강화 (1.0 s)', 'M2  최근 30 s 누적 이탈', 'M3  주의 버퍼'};
+names  = {'M0  R171 타이머 기준선', 'M1  재관여 강화 (1.0 s)', 'M2  최근 30 s 누적 이탈', 'M3  주의 버퍼'};
 colors = [0.165 0.471 0.839; 0.922 0.408 0.204; 0.106 0.686 0.478; 0.929 0.631 0];
 ink    = [0.32 0.32 0.31];
 stages = {'정상', 'EOR', '강화 EOR', 'DCA', '운전불가'};
