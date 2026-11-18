@@ -5,9 +5,9 @@
 ```
 deploy/
   codegen/   생성된 C 코드 (MATLAB에서 build_system.m 실행 결과. 손으로 고치지 말 것)
-  rpi/       실행 프로그램 des_main.c, Makefile, b2b_pi.sh, demo_check.sh
+  rpi/       실행 프로그램 des_main.c, Makefile, b2b_pi.sh, demo_check.sh, demo_ui.sh
   demo/      데모용 DMS CSV 4개
-  tools/     udp_send.py: DMS 대신 UDP 프레임을 보내는 테스트 송신기
+  tools/     des_gui.py: 5인치 터치스크린 화면 / udp_send.py: DMS 대신 UDP 프레임을 보내는 테스트 송신기
 ```
 
 ## 1. 복사와 빌드
@@ -20,6 +20,7 @@ scp -r deploy 사용자명@<Pi IP>:~/des
 Pi에서 실행:
 ```bash
 sudo apt install -y build-essential          # 최초 1회
+chmod -R u+w ~/des && chmod +x ~/des/rpi/*.sh   # Windows(OneDrive)에서 복사하면 읽기 전용이 되므로 매번
 cd ~/des/rpi && make                         # 터미널 출력만
 # LED/부저를 쓸 때:
 sudo apt install -y libgpiod-dev && make clean && make GPIO=1
@@ -35,6 +36,8 @@ sudo apt install -y libgpiod-dev && make clean && make GPIO=1
 | 로그 저장 | `--log run.csv` 추가 |
 | LED/부저 | `--gpio` 추가 (`make GPIO=1` 빌드 필요) |
 | 실시간 우선순위 | `sudo ./des_main ... --rt` |
+| 화면(GUI) 연동 | `--ui` 추가 (아래 "화면" 참고, 보통은 `./demo_ui.sh`로 실행) |
+| M3 단독 표시 | `--solo` 추가. 대시보드, 화면, LED에 M3만 나온다 (M0 LED는 꺼둠). 계산과 로그는 그대로 |
 
 - **키보드:** `space` = 운전자 응답(DCA 해제용, 0.5초 유지), `r` = 리셋, `q` = 종료
 - **종료 시 출력:** 모델별 첫 EOR 시각과 최고 단계, 10ms 주기 타이밍(깨어남 지연, 스텝 실행 시간). 타이밍 값은 보고서의 실시간 근거로 쓸 수 있다.
@@ -59,7 +62,34 @@ cd ~/des/rpi
 ```
 
 위 표의 값은 WSL gcc 빌드로 확인했고(11/16), MATLAB 기준 코드와 매 스텝 일치한다
-(`run_dms_results('deploy/demo', 5, 'build/demo_c')`). Pi에서도 같은 값이 나와야 한다.
+(`run_dms_results('deploy/demo', 5, 'build/demo_c')`). RPi5에서도 4개 모두 같은 값이 나왔다(11/18).
+
+### RPi5 확인 결과 (2026-11-18)
+
+| 항목 | 결과 |
+|---|---|
+| 빌드 (`make GPIO=1`, gcc, Raspberry Pi OS Trixie) | 경고 없이 성공 |
+| `demo_check.sh` | 데모 4개 모두 위 표와 같음 |
+| back-to-back (`run_b2b_c('pi')`) | 34개 시나리오, 415,233 스텝 모두 MATLAB 기준 코드와 일치 |
+| 10 ms 주기 (3_evasion, 2500 스텝) | 깨어남 지연 평균 0.057 ms / 최대 0.091 ms, 1 ms 초과 0회. 스텝 실행 평균 0.004 ms / 최대 0.013 ms |
+| 5인치 화면 | 비교 모드와 `--solo` 모두 정상 표시 |
+
+스텝 실행 시간 최대 0.013 ms는 10 ms 주기의 0.13%다. LED/부저 배선은 부품이 오면 확인한다.
+
+### 화면 (5인치 800x480 HDMI 터치스크린)
+
+M0와 M3의 경고 단계를 나란히 크게 보여주고, 시선 위치, 최근 30초 단계 변화, 터치 버튼(운전자 응답, 리셋)을 둔다.
+
+```bash
+sudo apt install -y python3-pygame fonts-noto-cjk     # 최초 1회
+./demo_ui.sh ../demo/3_evasion.csv --gpio             # 화면 + LED/부저 (M0와 M3 비교)
+./demo_ui.sh ../demo/3_evasion.csv --gpio --solo      # M3 단독 (제품처럼 보여줄 때)
+```
+
+- 구조: `des_main --ui`가 상태를 Pi 안(127.0.0.1:5006)으로 20 Hz 보내고, `tools/des_gui.py`는 그걸 그리기만 한다. 경고 판단은 전부 des_main이 한다. 화면이 느려져도 10 ms 루프와 LED/부저에는 영향이 없고, 계산 결과(로그)도 `--ui` 유무와 관계없이 같다.
+- 터치 버튼은 127.0.0.1:5007로 가서 키보드 `space`, `r`과 같은 경로로 들어간다.
+- Pi 데스크톱이 화면에 로그인된 상태여야 한다. SSH에서 GUI가 안 뜨면 Pi 화면의 터미널에서 `python3 ~/des/tools/des_gui.py`를 먼저 띄우고, SSH에서 `./des_main --csv ... --calib 5 --ui`를 실행한다.
+- 노트북에서 화면만 확인: `python des_gui.py --window --mock`
 
 ## 3. DMS 입력 형식
 

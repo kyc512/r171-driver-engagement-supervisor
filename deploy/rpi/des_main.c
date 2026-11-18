@@ -17,6 +17,10 @@
  *   --quiet          대시보드 끔
  *   --gpio [CHIP]    LED/부저 출력 (make GPIO=1로 빌드 필요). 기본 /dev/gpiochip0
  *   --rt             SCHED_FIFO 실시간 우선순위 (sudo 필요)
+ *   --solo           선택 모델만 표시 (대시보드, GUI, LED). M0는 내부에서 계속 계산하지만 보이지 않는다.
+ *                    계산 경로와 로그는 그대로이므로 back-to-back 결과에 영향이 없다.
+ *   --ui [PORT]      화면(GUI) 연동. 상태를 127.0.0.1:PORT(기본 5006)로 20 Hz 전송하고,
+ *                    PORT+1에서 터치 명령(action, reset)을 받는다. GUI는 tools/des_gui.py
  * 키보드 (터미널에서 실행 시)
  *   space: 운전자 응답(driver_action, 0.5초 유지)   r: 리셋   q: 종료
  *
@@ -60,8 +64,8 @@
 /* ------------------------------------------------------------------ 옵션 */
 static struct {
     const char *csv, *log, *gpio_chip;
-    int udp_port;
-    bool fast, quiet, gpio, rt;
+    int udp_port, ui_port;
+    bool fast, quiet, gpio, rt, solo;
     double yaw0, pitch0, calib, duration;
 } opt = {0};
 
@@ -73,7 +77,7 @@ static void usage(void)
     fprintf(stderr,
         "사용법: des_main (--csv FILE | --udp PORT) [--fast] [--log FILE]\n"
         "        [--yaw0 D --pitch0 D | --calib SEC] [--duration SEC] [--quiet]\n"
-        "        [--gpio [CHIP]] [--rt]\n");
+        "        [--gpio [CHIP]] [--rt] [--ui [PORT]] [--solo]\n");
     exit(2);
 }
 
@@ -88,6 +92,7 @@ static void parse_args(int argc, char **argv)
         else if (!strcmp(a, "--fast"))     opt.fast = true;
         else if (!strcmp(a, "--quiet"))    opt.quiet = true;
         else if (!strcmp(a, "--rt"))       opt.rt = true;
+        else if (!strcmp(a, "--solo"))     opt.solo = true;
         else if (!strcmp(a, "--yaw0"))     opt.yaw0 = atof(NEXT());
         else if (!strcmp(a, "--pitch0"))   opt.pitch0 = atof(NEXT());
         else if (!strcmp(a, "--calib"))    opt.calib = atof(NEXT());
@@ -95,6 +100,8 @@ static void parse_args(int argc, char **argv)
         else if (!strcmp(a, "--gpio")) {
             opt.gpio = true;
             opt.gpio_chip = (i + 1 < argc && argv[i + 1][0] != '-') ? argv[++i] : "/dev/gpiochip0";
+        } else if (!strcmp(a, "--ui")) {
+            opt.ui_port = (i + 1 < argc && argv[i + 1][0] != '-') ? atoi(argv[++i]) : 5006;
         } else usage();
 #undef NEXT
     }
@@ -257,7 +264,7 @@ static const char *ch_label(int c)
 static void summary_print(void)
 {
     fprintf(stderr, "\n== 요약: %ld 스텝 (%.2f s)\n", g_sum.steps, g_sum.steps * DES_DT);
-    for (int c = 0; c < DES_N_CH; c++) {
+    for (int c = opt.solo ? 1 : 0; c < DES_N_CH; c++) {
         if (g_sum.first_eor[c] >= 0)
             fprintf(stderr, "  %-16s 첫 EOR %7.2f s, 최고 단계 %s\n", ch_label(c),
                     g_sum.first_eor[c], des_state_name[g_sum.max_esc[c]]);
@@ -332,6 +339,53 @@ static void kbd_apply(des_input_t *in)
     if (g_reset_req) { in->reset = true; g_reset_req = false; }
 }
 
+/* ------------------------------------------------------------------ 화면(GUI) 연동 */
+/* 계산에는 관여하지 않는다. 상태를 보내고, 터치 명령은 키보드 입력과 같은 경로로 넣는다. */
+static int g_ui_sock = -1;
+static struct sockaddr_in g_ui_addr;
+static long g_ui_resets = 0;
+
+static void ui_open(int port)
+{
+    g_ui_sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (g_ui_sock < 0) { perror("socket(ui)"); exit(1); }
+    struct sockaddr_in a = {0};
+    a.sin_family = AF_INET;
+    a.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    a.sin_port = htons((unsigned short)(port + 1));
+    if (bind(g_ui_sock, (struct sockaddr *)&a, sizeof a) < 0) { perror("bind(ui)"); exit(1); }
+    fcntl(g_ui_sock, F_SETFL, O_NONBLOCK);
+    g_ui_addr = a;
+    g_ui_addr.sin_port = htons((unsigned short)port);
+}
+
+static void ui_poll(void)
+{
+    char buf[64];
+    if (g_ui_sock < 0) return;
+    for (;;) {
+        ssize_t r = recv(g_ui_sock, buf, sizeof buf - 1, 0);
+        if (r <= 0) break;
+        buf[r] = '\0';
+        if (!strncmp(buf, "action", 6)) g_action_left = ACTION_HOLD;
+        else if (!strncmp(buf, "reset", 5)) g_reset_req = true;
+    }
+}
+
+/* S,t,valid,yaw,pitch,gaze_on,frozen,esc_m0,metric_m0,esc_sel,metric_sel,action,sel_model,ended,resets,solo,source */
+static void ui_send(long k, const des_input_t *in, const des_output_t *o, bool ended)
+{
+    if (g_ui_sock < 0) return;
+    const char *src = opt.csv ? strrchr(opt.csv, '/') : NULL;
+    src = opt.csv ? (src ? src + 1 : opt.csv) : "UDP";
+    char buf[256];
+    int n = snprintf(buf, sizeof buf, "S,%.2f,%d,%.2f,%.2f,%d,%d,%d,%.3f,%d,%.3f,%d,%d,%d,%ld,%d,%s\n",
+                     k * DES_DT, in->valid, in->yaw, in->pitch, o->gaze_on, o->frozen,
+                     o->esc[0], o->metric[0], o->esc[1], o->metric[1], in->action,
+                     DES_SEL_MODEL, ended, g_ui_resets, opt.solo, src);
+    sendto(g_ui_sock, buf, (size_t)n, 0, (struct sockaddr *)&g_ui_addr, sizeof g_ui_addr);
+}
+
 /* ------------------------------------------------------------------ 대시보드 */
 static const char *state_color[5] = {"\033[1;32m", "\033[1;33m", "\033[1;35m", "\033[1;31m", "\033[1;37;41m"};
 static const char *metric_label[4] = {"이탈 타이머", "이탈 타이머", "누적 이탈  ", "주의 버퍼  "};
@@ -347,7 +401,7 @@ static void dash_draw(long k, const des_input_t *in, const des_output_t *o)
            in->pitch, o->gaze_on, o->frozen);
     if (opt.udp_port) printf("   DMS %.0f fps", g_dms_rate);
     printf("\033[K\n\n");
-    for (int c = 0; c < DES_N_CH; c++) {
+    for (int c = opt.solo ? 1 : 0; c < DES_N_CH; c++) {
         int m = c == 0 ? 0 : DES_SEL_MODEL;
         printf(" %-18s %s %-11s \033[0m  %s %5.2f s\033[K\n", ch_label(c), state_color[o->esc[c]],
                des_state_name[o->esc[c]], metric_label[m], o->metric[c]);
@@ -396,7 +450,8 @@ static void gpio_update(long k, const des_output_t *o)
     enum gpiod_line_value v[9];
     for (int c = 0; c < 2; c++)
         for (int j = 0; j < 4; j++)
-            v[4 * c + j] = o->esc[c] >= j + 1 ? GPIOD_LINE_VALUE_ACTIVE : GPIOD_LINE_VALUE_INACTIVE;
+            v[4 * c + j] = (o->esc[c] >= j + 1 && !(c == 0 && opt.solo))
+                         ? GPIOD_LINE_VALUE_ACTIVE : GPIOD_LINE_VALUE_INACTIVE;
     bool buzz = o->esc[1] >= 3 || (o->esc[1] == 2 && (k / 25) % 2 == 0);   /* 강화 EOR: 2 Hz 단속 */
     v[8] = buzz ? GPIOD_LINE_VALUE_ACTIVE : GPIOD_LINE_VALUE_INACTIVE;
     if (memcmp(v, g_val, sizeof v)) {
@@ -525,7 +580,8 @@ static void run_realtime(void)
     struct timespec next;
     clock_gettime(CLOCK_MONOTONIC, &next);
     double t0 = next.tv_sec + next.tv_nsec * 1e-9;
-    des_input_t in; des_output_t o;
+    des_input_t in = {0}; des_output_t o = {0};
+    long last_k = 0;
     dash_init();
 
     for (long k = 1; !g_stop; k++) {
@@ -552,7 +608,9 @@ static void run_realtime(void)
             }
             des_zoh(have ? &last : NULL, (double)(k - 1) * DES_DT, &in);
         }
+        ui_poll();
         kbd_apply(&in);
+        if (in.reset) g_ui_resets++;
 
         run_step(k, &in, &o);
         double exec = mono_s() - t_wake;
@@ -565,7 +623,10 @@ static void run_realtime(void)
             if (lat > 1e-3) g_tm.over1ms++;
         }
         if (k % 10 == 0) dash_draw(k, &in, &o);   /* 대시보드는 10 Hz */
+        if (k % 5 == 0) ui_send(k, &in, &o, false);   /* GUI는 20 Hz */
+        last_k = k;
     }
+    if (last_k) ui_send(last_k, &in, &o, true);
 }
 #endif /* !_WIN32 */
 
@@ -596,6 +657,7 @@ int main(int argc, char **argv)
             udp_open(opt.udp_port);
             if (opt.calib > 0) calib_udp();
         }
+        if (opt.ui_port) ui_open(opt.ui_port);
         kbd_init();
         run_realtime();
         timing_print();
