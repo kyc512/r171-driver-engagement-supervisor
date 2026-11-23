@@ -78,6 +78,6 @@ stateDiagram-v2
 | 항목 | 현재 | 비고 |
 |---|---|---|
 | Escalation 단계 시간 | 3 / 5 / 5 s (EOR 후 강화 / 강화 후 DCA / DCA 후 운전불가) | 확정 (11/12, R171 01 series 상한) |
-| 짧은 주시(<200 ms) 중 타이머 | 정지 (`count_glance_time=false`) | `true`면 4.9 s 이탈 후 복귀 시 0.1 s 가짜 EOR 발생 |
-| DCA 해제 조건 | 재관여 + driver_action | DCA가 요구하는 운전자 행동 정의에 따라 |
+| 짧은 주시(<200 ms) 중 타이머 | 정지 (`count_glance_time=false`) | 확정 (11/21, 팀). 근거와 한계는 `model_selection.md` "R171 해석" 절 |
+| DCA 해제 조건 | 재관여 + driver_action | 확정 (11/18, R171 5.5.4.2.3.3.2 최소 요건보다 엄격) |
 | gaze_valid=false | 이탈로 간주 | 얼굴 미검출 = 확인 불가 |

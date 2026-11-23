@@ -7,5 +7,5 @@
 #define DES_AOI_YAW     11  /* deg */
 #define DES_AOI_PITCH   13  /* deg */
 #define DES_FZ_W        10  /* s */
-#define DES_FZ_RANGE    1  /* deg */
+#define DES_FZ_RANGE    10  /* deg */
 #endif

@@ -1,3 +1,3 @@
-# build_system.m Л┐²Л└╠К╛╪ (Л└═М┐² К╙╗К█╦ M3)
+# build_system.m ╩Щ╪╨╧╟ (╪╠ец ╦П╣╗ M3)
 DES_GEN_SRCS = des_supervisor.c
 DES_GEN_DEFS = -DMODEL=des_supervisor -DNUMST=1 -DNCSTATES=0 -DHAVESTDIO -DRT -DUSE_RTMODEL -DCLASSIC_INTERFACE=0 -DALLOCATIONFCN=0 -DTID01EQ=0 -DMAT_FILE=0 -DONESTEPFCN=1 -DTERMFCN=1 -DMULTI_INSTANCE_CODE=0 -DINTEGER_CODE=0 -DMT=0

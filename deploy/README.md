@@ -52,8 +52,8 @@ sudo apt install -y libgpiod-dev && make clean && make GPIO=1
 |---|---|---|---|---|
 | `1_normal.csv` | s1_2_1 | 정상 주행 중 내비 확인 | 경고 없음 | 경고 없음 |
 | `2_continuous.csv` | s2_1 | 스마트폰 연속 이탈 | 11.11초 EOR | 11.11초 EOR (같은 시각) |
-| `3_evasion.csv` | s2_2_synthetic_time_aligned | 4.8초 이탈 / 0.3초 주시 반복 | **경고 없음** | 10.51초 EOR → 운전불가 |
-| `4_photo.csv` | s3_1B | 얼굴 사진을 카메라 앞에 둠 | 경고 없음 | 15.50초 EOR (고정 탐지) |
+| `3_evasion.csv` | s2_2 (11/23 재촬영, 25.0초까지) | 약 4.5초 이탈 / 0.5초 주시 반복 | **경고 없음** | 11.15초 EOR → 운전불가 |
+| `4_model.csv` | s3_1 | 머리 모형을 거치대에 고정 | 경고 없음 | 15.12초 EOR (고정 탐지) |
 
 ```bash
 cd ~/des/rpi
@@ -71,7 +71,7 @@ cd ~/des/rpi
 | 빌드 (`make GPIO=1`, gcc, Raspberry Pi OS Trixie) | 경고 없이 성공 |
 | `demo_check.sh` | 데모 4개 모두 위 표와 같음 |
 | back-to-back (`run_b2b_c('pi')`) | 34개 시나리오, 415,233 스텝 모두 MATLAB 기준 코드와 일치 |
-| 10 ms 주기 (3_evasion, 2500 스텝) | 깨어남 지연 평균 0.057 ms / 최대 0.091 ms, 1 ms 초과 0회. 스텝 실행 평균 0.004 ms / 최대 0.013 ms |
+| 10 ms 주기 (3_evasion 이전 합성본, 2500 스텝) | 깨어남 지연 평균 0.057 ms / 최대 0.091 ms, 1 ms 초과 0회. 스텝 실행 평균 0.004 ms / 최대 0.013 ms |
 | 5인치 화면 | 비교 모드와 `--solo` 모두 정상 표시 |
 
 스텝 실행 시간 최대 0.013 ms는 10 ms 주기의 0.13%다. LED/부저 배선은 부품이 오면 확인한다.
@@ -142,4 +142,4 @@ sock.sendto(f"{t:.3f},{int(valid)},{yaw:.2f},{pitch:.2f}\n".encode(), (PI_IP, 50
 
 노트북 MATLAB에서 `build_system(3)`을 실행한다(선택 모델 번호). `deploy/codegen/`이 다시 생성되면 Pi로 복사하고 `make`를 다시 한다.
 
-주시 영역 각도(`aoi_*`, 확정: yaw ±11°, pitch ±13°)와 고정 탐지 기준(`fz_*`, 임시값)은 `src/des_params.m`에서 바꾼다.
+주시 영역 각도(`aoi_*`, 확정: yaw ±11°, pitch ±13°)와 고정 탐지 기준(`fz_*`, 11/23 확정: 10초 동안 10° 미만)은 `src/des_params.m`에서 바꾼다.

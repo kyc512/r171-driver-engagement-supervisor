@@ -9,7 +9,7 @@
  *
  * Model version              : 1.1
  * Simulink Coder version : 26.2 (R2026b) 22-May-2026
- * C source code generated on : Thu Nov 12 12:41:44 2026
+ * C source code generated on : Mon Nov 23 21:19:59 2026
  *
  * Target selection: grt.tlc
  * Note: GRT includes extra infrastructure and instrumentation for prototyping
@@ -189,7 +189,7 @@ void des_supervisor_step(void)
         }
       }
 
-      if (ex - b_ex < 1.0) {
+      if (ex - b_ex < 10.0) {
         ex = des_supervisor_DW.SI.pb[0];
         b_ex = des_supervisor_DW.SI.pb[0];
         for (i = 0; i < 999; i++) {
@@ -203,7 +203,7 @@ void des_supervisor_step(void)
           }
         }
 
-        if (ex - b_ex < 1.0) {
+        if (ex - b_ex < 10.0) {
           rtb_frozen = true;
         }
       }
