@@ -9,6 +9,7 @@ des_main을 --ui 로 실행하면 상태를 127.0.0.1:5006 으로 20 Hz 보낸�
     python3 des_gui.py --window        # 창 모드 (노트북에서 확인)
     python3 des_gui.py --mock          # des_main 없이 가짜 데이터로 화면 확인
     키: q / Esc 종료,  f 전체화면 전환
+    터치: 위쪽 제목 줄을 2초 동안 누르고 있으면 종료
 
 필요: sudo apt install python3-pygame fonts-noto-cjk
 """
@@ -34,6 +35,8 @@ C = {
 AOI_YAW, AOI_PITCH = 11.0, 13.0          # src/des_params.m 과 같은 값 (표시용)
 METRIC_MAX = 5.0                          # M0 이탈 타이머 / M3 버퍼 상한 [s]
 HIST_S = 30.0
+EXIT_HOLD_S = 2.0                         # 제목 줄을 이만큼 누르고 있으면 종료
+HEADER = pygame.Rect(0, 0, W, 50)
 
 
 def find_font():
@@ -142,6 +145,7 @@ class App:
         self.btn_action = pygame.Rect(604, 300, 188, 84)
         self.btn_reset = pygame.Rect(604, 392, 188, 80)
         self.flash_until = {"action": 0.0, "reset": 0.0}
+        self.hold_t0 = None                      # 제목 줄을 누르기 시작한 시각
 
     # ---------------------------------------------------------------- 입출력
     def poll(self):
@@ -307,6 +311,14 @@ class App:
         self.text(self.f_small, f"./des_main --csv ... --calib 5 --ui {self.args.port}", C["muted"],
                   (W // 2, H // 2 + 14), "center")
 
+    def draw_exit_hold(self):
+        if self.hold_t0 is None:
+            return
+        k = min(1.0, (time.monotonic() - self.hold_t0) / EXIT_HOLD_S)
+        pygame.draw.rect(self.screen, C["panel"], HEADER)
+        pygame.draw.rect(self.screen, C["s"][3], pygame.Rect(0, 0, int(W * k), HEADER.height))
+        self.text(self.f_title, "계속 누르면 종료합니다", C["fg"], HEADER.center, "center")
+
     def draw(self):
         self.screen.fill(C["bg"])
         self.draw_header()
@@ -321,6 +333,7 @@ class App:
         if not self.mock and (self.st.last_rx == 0 or
                               (not self.st.ended and time.monotonic() - self.st.last_rx > 1.0)):
             self.draw_wait()
+        self.draw_exit_hold()
 
     # ---------------------------------------------------------------- 루프
     def run(self):
@@ -348,6 +361,17 @@ class App:
                         self.send("action")
                     elif self.btn_reset.collidepoint(pos):
                         self.send("reset")
+                    elif HEADER.collidepoint(pos) and self.hold_t0 is None:
+                        self.hold_t0 = time.monotonic()
+                # 손을 떼거나 제목 줄 밖으로 끌면 종료 취소
+                if ev.type in (pygame.MOUSEBUTTONUP, pygame.FINGERUP):
+                    self.hold_t0 = None
+                elif ev.type == pygame.MOUSEMOTION and not HEADER.collidepoint(ev.pos):
+                    self.hold_t0 = None
+                elif ev.type == pygame.FINGERMOTION and not HEADER.collidepoint((int(ev.x * W), int(ev.y * H))):
+                    self.hold_t0 = None
+            if self.hold_t0 is not None and time.monotonic() - self.hold_t0 >= EXIT_HOLD_S:
+                return
             self.poll()
             self.draw()
             pygame.display.flip()

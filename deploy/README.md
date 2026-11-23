@@ -98,6 +98,7 @@ sudo reboot
 
 - 구조: `des_main --ui`가 상태를 Pi 안(127.0.0.1:5006)으로 20 Hz 보내고, `tools/des_gui.py`는 그걸 그리기만 한다. 경고 판단은 전부 des_main이 한다. 화면이 느려져도 10 ms 루프와 LED/부저에는 영향이 없고, 계산 결과(로그)도 `--ui` 유무와 관계없이 같다.
 - 터치 버튼은 127.0.0.1:5007로 가서 키보드 `space`, `r`과 같은 경로로 들어간다.
+- 종료: 위쪽 제목 줄을 2초 동안 누르고 있으면 GUI가 꺼진다(누르는 동안 빨간 막대가 찬다. 중간에 떼면 취소). 키보드는 `Esc` 또는 `q`, SSH에서는 `pkill -f des_gui.py`.
 - Pi 데스크톱이 화면에 로그인된 상태여야 한다. SSH에서 GUI가 안 뜨면 Pi 화면의 터미널에서 `python3 ~/des/tools/des_gui.py`를 먼저 띄우고, SSH에서 `./des_main --csv ... --calib 5 --ui`를 실행한다.
 - 노트북에서 화면만 확인: `python des_gui.py --window --mock`
 
