@@ -61,20 +61,20 @@ cd ~/des/rpi
 ./demo_check.sh                                           # 4개를 빠르게 돌려 위 표와 같은지 확인 (로그: ../demo_log)
 ```
 
-위 표의 값은 WSL gcc 빌드로 확인했고(11/16), MATLAB 기준 코드와 매 스텝 일치한다
-(`run_dms_results('deploy/demo', 5, 'build/demo_c')`). RPi5에서도 4개 모두 같은 값이 나왔다(11/18).
+위 표의 값은 WSL gcc 빌드로 확인했고, MATLAB 기준 코드와 매 스텝 일치한다
+(`run_dms_results('deploy/demo', 5, 'build/demo_c')`). RPi5에서도 4개 모두 같은 값이 나왔다(11/23).
 
-### RPi5 확인 결과 (2026-11-18)
+### RPi5 확인 결과 (2026-11-23, `fz_range` 10° 반영 후)
 
 | 항목 | 결과 |
 |---|---|
 | 빌드 (`make GPIO=1`, gcc, Raspberry Pi OS Trixie) | 경고 없이 성공 |
 | `demo_check.sh` | 데모 4개 모두 위 표와 같음 |
 | back-to-back (`run_b2b_c('pi')`) | 34개 시나리오, 415,233 스텝 모두 MATLAB 기준 코드와 일치 |
-| 10 ms 주기 (3_evasion 이전 합성본, 2500 스텝) | 깨어남 지연 평균 0.057 ms / 최대 0.091 ms, 1 ms 초과 0회. 스텝 실행 평균 0.004 ms / 최대 0.013 ms |
-| 5인치 화면 | 비교 모드와 `--solo` 모두 정상 표시 |
+| 10 ms 주기 (11/18, 3_evasion 이전 합성본, 2500 스텝) | 깨어남 지연 평균 0.057 ms / 최대 0.091 ms, 1 ms 초과 0회. 스텝 실행 평균 0.004 ms / 최대 0.013 ms |
+| 5인치 화면 | 비교 모드와 `--solo` 모두 정상 표시, 터치 버튼 동작 |
 
-스텝 실행 시간 최대 0.013 ms는 10 ms 주기의 0.13%다. LED/부저 배선은 부품이 오면 확인한다.
+스텝 실행 시간 최대 0.013 ms는 10 ms 주기의 0.13%다. 데모는 화면만 쓴다(`--gpio` 없이 실행). 화면이 핀 헤더를 쓰기 때문에 LED/부저는 연결하지 않았고, GPIO 출력 코드는 그대로 남아 있다.
 
 ### 화면 (5인치 800x480 HDMI 터치스크린)
 
@@ -82,8 +82,18 @@ M0와 M3의 경고 단계를 나란히 크게 보여주고, 시선 위치, 최�
 
 ```bash
 sudo apt install -y python3-pygame fonts-noto-cjk     # 최초 1회
-./demo_ui.sh ../demo/3_evasion.csv --gpio             # 화면 + LED/부저 (M0와 M3 비교)
-./demo_ui.sh ../demo/3_evasion.csv --gpio --solo      # M3 단독 (제품처럼 보여줄 때)
+./demo_ui.sh ../demo/3_evasion.csv                    # M0와 M3 비교
+./demo_ui.sh ../demo/3_evasion.csv --solo             # M3 단독 (제품처럼 보여줄 때)
+./demo_ui.sh ../demo/4_model.csv                      # 머리 모형 (고정 탐지)
+```
+
+**터치 켜기 (최초 1회):** 이 화면의 터치는 핀 헤더의 SPI(XPT2046)로 들어온다. Raspberry Pi OS 기본 설정에는 꺼져 있다.
+
+```bash
+sudo cp /boot/firmware/config.txt /boot/firmware/config.txt.bak
+sudo sed -i 's/^#dtparam=spi=on/dtparam=spi=on/' /boot/firmware/config.txt
+echo 'dtoverlay=ads7846,cs=1,penirq=25,penirq_pull=2,speed=50000,keep_vref_on=0,swapxy=0,pmax=255,xohms=150,xmin=200,xmax=3900,ymin=200,ymax=3900' | sudo tee -a /boot/firmware/config.txt
+sudo reboot
 ```
 
 - 구조: `des_main --ui`가 상태를 Pi 안(127.0.0.1:5006)으로 20 Hz 보내고, `tools/des_gui.py`는 그걸 그리기만 한다. 경고 판단은 전부 des_main이 한다. 화면이 느려져도 10 ms 루프와 LED/부저에는 영향이 없고, 계산 결과(로그)도 `--ui` 유무와 관계없이 같다.
